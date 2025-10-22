@@ -51,11 +51,13 @@ public class BookingsController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Object> createBooking(@RequestBody CreateBooking request) {
+    public ResponseEntity<Object> createBooking(
+            @RequestParam UUID tenantId,
+            @RequestBody CreateBooking request) {
         return ResponseHandler.responseBuilder(
                 "Booking successfully created",
                 HttpStatus.CREATED,
-                bookingService.createBooking(request)
+                bookingService.createBooking(tenantId, request)
         );
     }
 

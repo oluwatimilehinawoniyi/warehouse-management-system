@@ -114,6 +114,23 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(BookingConflictException.class)
+    public ResponseEntity<ErrorResponse> handleBookingConflictException(
+            BookingConflictException ex,
+            WebRequest request
+    ) {
+        log.warn("Booking Conflict: {} - {}", ex.getMessage(), request.getDescription(false));
+        HttpStatus status = HttpStatus.CONFLICT;
+        return new ResponseEntity<>(
+                new ErrorResponse(
+                        ex.getMessage(),
+                        request.getDescription(false),
+                        status.value()
+                ),
+                status
+        );
+    }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(

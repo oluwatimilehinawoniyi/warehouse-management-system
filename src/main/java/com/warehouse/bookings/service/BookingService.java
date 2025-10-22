@@ -6,14 +6,17 @@ import com.warehouse.bookings.repository.BookingsRepository;
 import com.warehouse.common.dto.CreateBooking;
 import com.warehouse.common.dto.ExpiringBooking;
 import com.warehouse.common.dto.UpdateBooking;
+import com.warehouse.common.exceptions.BookingConflictException;
 import com.warehouse.common.exceptions.NotFoundException;
 import com.warehouse.common.exceptions.UnauthorizedAccessException;
 import com.warehouse.common.mapper.BookingMapper;
 import com.warehouse.customers.entity.Customer;
 import com.warehouse.customers.repository.CustomersRepository;
+import com.warehouse.storage.entity.StorageStatus;
 import com.warehouse.storage.entity.StorageUnit;
 import com.warehouse.storage.repository.StorageRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -83,32 +86,57 @@ public class BookingService {
     /**
      * Create a new booking
      *
-     * @param request information to create a new booking
+     * @param tenantId tenantId
+     * @param request  information to create a new booking
      * @return a booking dto
+     * @throws BookingConflictException if the unit was just booked by another customer
      */
     @Transactional
-    public Object createBooking(CreateBooking request) {
-        Booking booking = new Booking();
+    public Object createBooking(UUID tenantId, CreateBooking request) {
+        try {
+            StorageUnit storageUnit = storageRepository.findById(request.storageUnitId())
+                    .orElseThrow(() -> new NotFoundException("Storage Unit not found"));
 
-        StorageUnit storageUnit = storageRepository.findById(request.storageUnitId())
-                .orElseThrow(() -> new NotFoundException("Storage Unit not found"));
+            if (storageUnit.getStatus() != StorageStatus.AVAILABLE) {
+                throw new IllegalStateException(
+                        "Storage unit is not available. Current status: " + storageUnit.getStatus()
+                );
+            }
 
-        Customer customer = customersRepository.findById(request.customerId())
-                .orElseThrow(() -> new NotFoundException("Customer not found"));
+            Booking booking = new Booking();
 
-        booking.setCustomerId(request.customerId());
-        booking.setStorageUnitId(request.storageUnitId());
-        booking.setStorageUnit(storageUnit);
-        booking.setStartDate(request.startDate());
-        booking.setEndDate(request.endDate());
-        booking.setMonthlyRate(request.monthlyRate());
-        booking.setStatus(BookingStatus.ACTIVE);
-        booking.setCreatedAt(LocalDateTime.now());
-        booking.setCustomer(customer);
+            Customer customer = customersRepository.findById(request.customerId())
+                    .orElseThrow(() -> new NotFoundException("Customer not found"));
 
-        Booking newBooking = bookingsRepository.save(booking);
+            if (!customer.getTenantId().equals(tenantId)) {
+                throw new UnauthorizedAccessException(
+                        "Customer does not belong to the same tenant as the storage unit"
+                );
+            }
 
-        return bookingMapper.toDto(newBooking);
+            booking.setCustomerId(request.customerId());
+            booking.setStorageUnitId(request.storageUnitId());
+            booking.setStartDate(request.startDate());
+            booking.setEndDate(request.endDate());
+            booking.setMonthlyRate(request.monthlyRate());
+            booking.setStatus(BookingStatus.ACTIVE);
+            booking.setCreatedAt(LocalDateTime.now());
+            booking.setStorageUnit(storageUnit);
+            booking.setCustomer(customer);
+
+            storageUnit.setStatus(StorageStatus.OCCUPIED);
+            storageRepository.save(storageUnit);
+
+            Booking newBooking = bookingsRepository.save(booking);
+            return bookingMapper.toDto(newBooking);
+        } catch (BookingConflictException e) {
+            log.warn("Optimistic lock failure when booking unit {}: {}",
+                    request.storageUnitId(), e.getMessage());
+            throw new BookingConflictException(
+                    "This storage unit was just booked by another customer. Please select another unit."
+            );
+        }
+
     }
 
     /**
