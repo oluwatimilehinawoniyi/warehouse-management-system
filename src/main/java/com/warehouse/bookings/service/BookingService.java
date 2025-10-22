@@ -97,7 +97,7 @@ public class BookingService {
     public Object createBooking(UUID tenantId, CreateBooking request) {
         try {
             StorageUnit storageUnit = storageRepository
-                    .findByIdWithLock(request.storageUnitId())
+                    .findById(request.storageUnitId())
                     .orElseThrow(() -> new NotFoundException("Storage Unit not found"));
 
             if (storageUnit.getStatus() != StorageStatus.AVAILABLE) {
