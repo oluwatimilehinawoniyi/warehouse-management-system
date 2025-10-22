@@ -3,7 +3,9 @@ package com.warehouse.storage.repository;
 import com.warehouse.common.dto.WarehouseUtilization;
 import com.warehouse.storage.entity.StorageStatus;
 import com.warehouse.storage.entity.StorageUnit;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,6 +16,11 @@ import java.util.UUID;
 
 @Repository
 public interface StorageRepository extends JpaRepository<StorageUnit, UUID> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM StorageUnit s WHERE s.id = :id")
+    Optional<StorageUnit> findByIdWithLock(@Param("id") UUID id);
+
     /**
      * find available storage units for a tenant with minimum capacity
      */

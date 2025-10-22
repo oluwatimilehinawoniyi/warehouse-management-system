@@ -15,8 +15,10 @@ import com.warehouse.customers.repository.CustomersRepository;
 import com.warehouse.storage.entity.StorageStatus;
 import com.warehouse.storage.entity.StorageUnit;
 import com.warehouse.storage.repository.StorageRepository;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,7 +96,8 @@ public class BookingService {
     @Transactional
     public Object createBooking(UUID tenantId, CreateBooking request) {
         try {
-            StorageUnit storageUnit = storageRepository.findById(request.storageUnitId())
+            StorageUnit storageUnit = storageRepository
+                    .findByIdWithLock(request.storageUnitId())
                     .orElseThrow(() -> new NotFoundException("Storage Unit not found"));
 
             if (storageUnit.getStatus() != StorageStatus.AVAILABLE) {
@@ -129,7 +132,7 @@ public class BookingService {
 
             Booking newBooking = bookingsRepository.save(booking);
             return bookingMapper.toDto(newBooking);
-        } catch (BookingConflictException e) {
+        } catch (OptimisticLockException | ObjectOptimisticLockingFailureException e) {
             log.warn("Optimistic lock failure when booking unit {}: {}",
                     request.storageUnitId(), e.getMessage());
             throw new BookingConflictException(
