@@ -43,7 +43,6 @@ public class TenantService {
         return tenantRepository.getStatisticsForTenant(tenantId);
     }
 
-
     // Tenant's complete business view
 //    Response: {
 //        companyInfo,
