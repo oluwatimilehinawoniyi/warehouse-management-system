@@ -4,6 +4,7 @@ import com.warehouse.bookings.service.BookingService;
 import com.warehouse.common.dto.CreateBooking;
 import com.warehouse.common.dto.UpdateBooking;
 import com.warehouse.common.response.ResponseHandler;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,11 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/bookings")
+@Tag(
+        name="Bookings",
+        description = "Allocation of units in warehouses to Customers by tenants. " +
+                "An individual meet a Tenant (their admin) to book units in their warehouse(s) and the Tenant/admin creates the Customer and the Booking."
+)
 public class BookingsController {
     private final BookingService bookingService;
 

@@ -6,6 +6,7 @@ import com.warehouse.common.dto.UpdateUnit;
 import com.warehouse.common.exceptions.InvalidCapacityException;
 import com.warehouse.common.response.ResponseHandler;
 import com.warehouse.storage.service.StorageService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,10 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/storages")
+@Tag(
+        name="Storage Units",
+        description = "Storage units available in a warehouse"
+)
 public class StorageController {
     private final StorageService storageService;
 

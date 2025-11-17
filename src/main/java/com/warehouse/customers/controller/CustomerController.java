@@ -4,6 +4,7 @@ import com.warehouse.common.dto.CustomerRequest;
 import com.warehouse.common.dto.UpdateCustomer;
 import com.warehouse.common.response.ResponseHandler;
 import com.warehouse.customers.service.CustomerService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,10 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/customers")
+@Tag(
+        name="Customers",
+        description = "Individuals who book storage units in warehouses"
+)
 public class CustomerController {
 
     private final CustomerService customerService;
