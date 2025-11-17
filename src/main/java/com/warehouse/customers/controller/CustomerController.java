@@ -4,6 +4,7 @@ import com.warehouse.common.dto.CustomerRequest;
 import com.warehouse.common.dto.UpdateCustomer;
 import com.warehouse.common.response.ResponseHandler;
 import com.warehouse.customers.service.CustomerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,7 @@ public class CustomerController {
 
     @PostMapping()
     public ResponseEntity<Object> createCustomer(
-            @RequestBody CustomerRequest request,
+            @Valid @RequestBody CustomerRequest request,
             @RequestParam UUID tenantId
     ) {
         return ResponseHandler.responseBuilder(

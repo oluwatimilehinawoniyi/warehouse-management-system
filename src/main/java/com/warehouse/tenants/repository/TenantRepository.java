@@ -22,12 +22,12 @@ public interface TenantRepository extends JpaRepository<Tenant, UUID> {
             (CASE WHEN COUNT(su.id) = 0
                   THEN 0
                   ELSE (COUNT(CASE WHEN su.status = 'OCCUPIED' THEN 1 END) * 100.0 / COUNT(su.id))
-             END)
+             END))
             FROM Tenant t
             LEFT JOIN Warehouse w ON w.tenantId = t.id
             LEFT JOIN StorageUnit su ON w.id = su.warehouseId
             LEFT JOIN Customer c ON c.tenantId = t.id
-            LEFT JOIN Booking b ON b.customer_id = c.id
+            LEFT JOIN Booking b ON b.customerId = c.id
             WHERE t.id = :tenantId
             """)
     TenantStatResponse getStatisticsForTenant(@Param("tenantId") UUID tenantId);

@@ -11,7 +11,7 @@ public interface StorageMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "version", ignore = true)
-    @Mapping(target = "status", constant = "ACTIVE")
+    @Mapping(target = "status", constant = "AVAILABLE")
     StorageUnit toEntity(StorageUnitResponse dto);
 
     StorageUnitResponse toDto(StorageUnit entity);

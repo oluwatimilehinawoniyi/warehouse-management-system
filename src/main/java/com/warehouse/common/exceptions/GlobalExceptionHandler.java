@@ -4,12 +4,16 @@ import com.warehouse.common.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -25,6 +29,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 new ErrorResponse(
                         ex.getMessage(),
+                        null,
                         request.getDescription(false),
                         status.value()),
                 status
@@ -39,7 +44,9 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.FORBIDDEN;
         return new ResponseEntity<>(
                 new ErrorResponse(ex.getMessage(),
-                        request.getDescription(false), status.value()),
+                        null,
+                        request.getDescription(false),
+                        status.value()),
                 status
         );
     }
@@ -47,17 +54,24 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex, WebRequest request) {
-        String errors = ex.getBindingResult()
+        Map<String, List<String>> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.joining(", "));
+                .collect(
+                        Collectors.groupingBy(FieldError::getField,
+                                Collectors.mapping(
+                                        FieldError::getDefaultMessage,
+                                        Collectors.toList()
+                                ))
+                );
         log.warn("Validation Exception: {} - {}", errors,
                 request.getDescription(false));
         HttpStatus status = HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(
-                new ErrorResponse("Validation failed: " + errors,
-                        request.getDescription(false), status.value()),
+                new ErrorResponse("Validation failed",
+                        errors,
+                        request.getDescription(false),
+                        status.value()),
                 status
         );
     }
@@ -75,7 +89,7 @@ public class GlobalExceptionHandler {
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(
-                new ErrorResponse(message, request.getDescription(false), status.value()),
+                new ErrorResponse(message, null, request.getDescription(false), status.value()),
                 status
         );
     }
@@ -91,6 +105,7 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(
                 new ErrorResponse(message,
+                        null,
                         request.getDescription(false)
                         , status.value()),
                 status
@@ -108,6 +123,7 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         return new ResponseEntity<>(
                 new ErrorResponse(message,
+                        null,
                         request.getDescription(false)
                         , status.value()),
                 status
@@ -124,6 +140,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 new ErrorResponse(
                         ex.getMessage(),
+                        null,
                         request.getDescription(false),
                         status.value()
                 ),
@@ -141,7 +158,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 new ErrorResponse(
                         "An unexpected error occurred. Please try again later.",
-                        request.getDescription(false), status.value()),
+                        null,
+                        request.getDescription(false),
+                        status.value()),
                 status
         );
     }

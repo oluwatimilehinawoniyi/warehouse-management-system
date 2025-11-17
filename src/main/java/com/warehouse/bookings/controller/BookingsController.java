@@ -4,6 +4,7 @@ import com.warehouse.bookings.service.BookingService;
 import com.warehouse.common.dto.CreateBooking;
 import com.warehouse.common.dto.UpdateBooking;
 import com.warehouse.common.response.ResponseHandler;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -53,7 +54,7 @@ public class BookingsController {
     @PostMapping("/")
     public ResponseEntity<Object> createBooking(
             @RequestParam UUID tenantId,
-            @RequestBody CreateBooking request) {
+            @Valid @RequestBody CreateBooking request) {
         return ResponseHandler.responseBuilder(
                 "Booking successfully created",
                 HttpStatus.CREATED,

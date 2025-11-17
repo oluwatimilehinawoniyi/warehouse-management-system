@@ -6,6 +6,7 @@ import com.warehouse.common.dto.UpdateUnit;
 import com.warehouse.common.exceptions.InvalidCapacityException;
 import com.warehouse.common.response.ResponseHandler;
 import com.warehouse.storage.service.StorageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/storage")
+@RequestMapping("/api/v1/storages")
 public class StorageController {
     private final StorageService storageService;
 
@@ -68,7 +69,7 @@ public class StorageController {
 
     @PostMapping
     public ResponseEntity<Object> createStorageUnit(@RequestParam UUID tenantId,
-                                                    @RequestBody CreateStorageUnit request) {
+                                                    @Valid @RequestBody CreateStorageUnit request) {
         return ResponseHandler.responseBuilder(
                 "Storage successfully created",
                 HttpStatus.CREATED,

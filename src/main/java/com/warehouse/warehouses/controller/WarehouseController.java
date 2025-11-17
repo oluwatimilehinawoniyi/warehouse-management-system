@@ -4,6 +4,7 @@ import com.warehouse.common.dto.CreateWarehouse;
 import com.warehouse.common.dto.UpdateWarehouse;
 import com.warehouse.common.response.ResponseHandler;
 import com.warehouse.warehouses.service.WarehouseService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class WarehouseController {
     }
 
     // Get specific warehouse
-    @GetMapping
+    @GetMapping("/{warehouseId}")
     public ResponseEntity<Object> getWarehouse(
             @PathVariable UUID warehouseId,
             @RequestParam UUID tenantId) {
@@ -44,7 +45,7 @@ public class WarehouseController {
     // Create warehouse
     @PostMapping
     public ResponseEntity<Object> createWarehouse(
-            @RequestBody CreateWarehouse request,
+            @Valid @RequestBody CreateWarehouse request,
             @RequestParam UUID tenantId
     ) {
         return ResponseHandler.responseBuilder(

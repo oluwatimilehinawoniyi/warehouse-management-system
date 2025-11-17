@@ -49,7 +49,7 @@ public class CustomerService {
     @Transactional(readOnly = true)
     public CustomerResponse getCustomer(UUID customerId, UUID tenantId) {
         Customer customer = customersRepository
-                .findByTenantIdAndCustomerId(tenantId, customerId)
+                .findByIdAndTenantId(customerId, tenantId)
                 .orElseThrow(() -> new NotFoundException("Customer not found"));
 
         return customerMapper.toDto(customer);
@@ -117,7 +117,7 @@ public class CustomerService {
         Tenant tenant = tenantRepository.findById(tenantId)
                 .orElseThrow(() -> new NotFoundException("Tenant not found. Customer can't be deleted."));
 
-        Customer customer = customersRepository.findByTenantIdAndCustomerId(tenantId, customerId)
+        Customer customer = customersRepository.findByIdAndTenantId(customerId, tenantId)
                 .orElseThrow(() -> new NotFoundException("Customer not found."));
 
         customersRepository.delete(customer);

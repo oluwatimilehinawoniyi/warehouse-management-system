@@ -39,7 +39,7 @@ public class WarehouseService {
     @Transactional(readOnly = true)
     public WarehouseResponse getWarehouse(UUID tenantId, UUID warehouseId) {
         Warehouse w = warehouseRepository
-                .findByTenantIdAndWarehouseId(tenantId, warehouseId)
+                .findByIdAndTenantId(warehouseId, tenantId)
                 .orElseThrow(
                         () -> new NotFoundException("Warehouse not found")
                 );
@@ -66,7 +66,7 @@ public class WarehouseService {
     @Transactional
     public WarehouseResponse updateWarehouse(UUID tenantId, UUID warehouseId, UpdateWarehouse request) {
         Warehouse warehouse = warehouseRepository
-                .findByTenantIdAndWarehouseId(tenantId, warehouseId)
+                .findByIdAndTenantId(warehouseId, tenantId)
                 .orElseThrow(() -> new NotFoundException("Warehouse not found"));
 
         warehouse.setName(request.name());
@@ -79,7 +79,7 @@ public class WarehouseService {
     @Transactional
     public void deleteWarehouse(UUID tenantId, UUID warehouseId) {
         Warehouse warehouse = warehouseRepository
-                .findByTenantIdAndWarehouseId(tenantId, warehouseId)
+                .findByIdAndTenantId(warehouseId, tenantId)
                 .orElseThrow(() -> new NotFoundException("Warehouse not found"));
 
         warehouseRepository.delete(warehouse);
