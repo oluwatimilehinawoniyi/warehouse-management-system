@@ -10,6 +10,7 @@ import com.warehouse.customers.repository.CustomersRepository;
 import com.warehouse.tenants.entity.Tenant;
 import com.warehouse.tenants.repository.TenantRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CustomerService {
     private final CustomersRepository customersRepository;
     private final CustomerMapper customerMapper;
@@ -62,7 +64,7 @@ public class CustomerService {
      * @param tenantId the tenant
      * @return a customer belonging to the tenant
      */
-    @Transactional
+    @CacheEvict(value = "tenantStats", key = "#tenantId")
     public CustomerResponse createCustomer(
             UUID tenantId,
             CustomerRequest request) {
@@ -88,7 +90,6 @@ public class CustomerService {
      * @param tenantId the tenant
      * @return updated customer
      */
-    @Transactional
     public CustomerResponse updateCustomer(
             UUID tenantId,
             UUID customerId,
@@ -112,7 +113,6 @@ public class CustomerService {
      * @param customerId the customer
      * @param tenantId   the tenant
      */
-    @Transactional
     public void deleteCustomer(UUID customerId, UUID tenantId) {
         Tenant tenant = tenantRepository.findById(tenantId)
                 .orElseThrow(() -> new NotFoundException("Tenant not found. Customer can't be deleted."));

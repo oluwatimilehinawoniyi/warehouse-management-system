@@ -1,5 +1,6 @@
 package com.warehouse.tenants.controller;
 
+import com.warehouse.common.dto.CreateTenant;
 import com.warehouse.common.response.ResponseHandler;
 import com.warehouse.tenants.service.TenantService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -7,6 +8,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +36,7 @@ public class TenantController {
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "404", description = "Tenant not found")
     })
-    @GetMapping("/profile?tenant={tenantId}")
+    @GetMapping("/profile")
     public ResponseEntity<Object> getProfile(
             @Parameter(
                     description = "ID of the tenant (warehouse company). In production, this would come from JWT claims rather than a query parameter",
@@ -59,7 +61,7 @@ public class TenantController {
 //            @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "404", description = "Tenant not found")
     })
-    @GetMapping("/stats?tenantId={tenantId}")
+    @GetMapping("/stats")
     public ResponseEntity<Object> stats(
             @Parameter(
                     description = "ID of the tenant (warehouse company). In production, this would come from JWT claims rather than a query parameter",
@@ -89,4 +91,23 @@ public class TenantController {
 // Tenant settings
 //    PATCH /tenants/settings?tenantId={id}
 //    Body: { notifications?, timezone?, currency? }
+
+    @Operation(
+            summary = "Create a new tenant",
+            description = "Registers a new warehouse company in the system. This is typically done during onboarding."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Tenant created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data")
+    })
+    @PostMapping
+    public ResponseEntity<Object> createTenant(
+            @Valid @RequestBody CreateTenant request
+    ) {
+        return ResponseHandler.responseBuilder(
+                "Tenant successfully created",
+                HttpStatus.CREATED,
+                tenantService.createTenant(request)
+        );
+    }
 }

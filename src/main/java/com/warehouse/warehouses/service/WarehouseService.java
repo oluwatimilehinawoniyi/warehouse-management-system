@@ -11,6 +11,7 @@ import com.warehouse.warehouses.entity.Warehouse;
 import com.warehouse.warehouses.repository.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.UUID;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class WarehouseService {
 
     private final WarehouseRepository warehouseRepository;
@@ -46,7 +48,7 @@ public class WarehouseService {
         return warehouseMapper.toDto(w);
     }
 
-    @Transactional
+    @CacheEvict(value = "tenantStats", key = "#tenantId")
     public WarehouseResponse createWarehouse(UUID tenantId, CreateWarehouse request) {
         Tenant tenant = tenantRepository
                 .findById(tenantId)
@@ -63,7 +65,6 @@ public class WarehouseService {
         return warehouseMapper.toDto(savedWarehouse);
     }
 
-    @Transactional
     public WarehouseResponse updateWarehouse(UUID tenantId, UUID warehouseId, UpdateWarehouse request) {
         Warehouse warehouse = warehouseRepository
                 .findByIdAndTenantId(warehouseId, tenantId)
@@ -76,7 +77,6 @@ public class WarehouseService {
         return warehouseMapper.toDto(updatedWarehouse);
     }
 
-    @Transactional
     public void deleteWarehouse(UUID tenantId, UUID warehouseId) {
         Warehouse warehouse = warehouseRepository
                 .findByIdAndTenantId(warehouseId, tenantId)

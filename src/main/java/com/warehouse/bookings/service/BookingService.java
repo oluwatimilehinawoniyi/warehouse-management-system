@@ -18,6 +18,7 @@ import com.warehouse.storage.repository.StorageRepository;
 import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class BookingService {
 
     private final BookingsRepository bookingsRepository;
@@ -93,7 +95,7 @@ public class BookingService {
      * @return a booking dto
      * @throws BookingConflictException if the unit was just booked by another customer
      */
-    @Transactional
+    @CacheEvict(value = "tenantStats", key = "#tenantId")
     public Object createBooking(UUID tenantId, CreateBooking request) {
         try {
             StorageUnit storageUnit = storageRepository
