@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
@@ -96,10 +97,11 @@ public class BookingService {
      * @throws BookingConflictException if the unit was just booked by another customer
      */
     @CacheEvict(value = "tenantStats", key = "#tenantId")
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Object createBooking(UUID tenantId, CreateBooking request) {
         try {
             StorageUnit storageUnit = storageRepository
-                    .findById(request.storageUnitId())
+                    .findByIdWithLock(request.storageUnitId())
                     .orElseThrow(() -> new NotFoundException("Storage Unit not found"));
 
             if (storageUnit.getStatus() != StorageStatus.AVAILABLE) {

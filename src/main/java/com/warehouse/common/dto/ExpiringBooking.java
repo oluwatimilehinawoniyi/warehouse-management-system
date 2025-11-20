@@ -13,5 +13,6 @@ public record ExpiringBooking(
         String warehouseName,
         String unitNumber,
         Integer capacityKg,
-        BigDecimal monthlyRate
+        BigDecimal monthlyRate,
+        UUID tenantId
 ) {}

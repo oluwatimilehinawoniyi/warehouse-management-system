@@ -37,3 +37,4 @@ plan.txt
 application-local.properties
 
 *.http
+*.log

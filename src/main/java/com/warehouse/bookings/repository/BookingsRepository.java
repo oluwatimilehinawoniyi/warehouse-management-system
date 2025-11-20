@@ -14,7 +14,7 @@ import java.util.UUID;
 @Repository
 public interface BookingsRepository extends JpaRepository<Booking, UUID> {
     /**
-     * get bookings that will expire soon
+     * get bookings that will expire soon for a tenant
      */
     @Query("""
             SELECT new com.warehouse.common.dto.ExpiringBooking(
@@ -26,7 +26,8 @@ public interface BookingsRepository extends JpaRepository<Booking, UUID> {
                 w.name,
                 su.unitNumber,
                 su.capacityKg,
-                b.monthlyRate
+                b.monthlyRate,
+                w.tenantId
             )
             FROM Booking b
             JOIN Customer c ON b.customerId = c.id
@@ -39,6 +40,31 @@ public interface BookingsRepository extends JpaRepository<Booking, UUID> {
     List<ExpiringBooking> getExpiringBookings(
             @Param("tenantId") UUID tenantId,
             @Param("endDate") LocalDate endDate);
+
+    /**
+     * Get ALL expiring bookings across ALL tenants (for scheduler)
+     */
+    @Query("""
+        SELECT new com.warehouse.common.dto.ExpiringBooking(
+            b.id,
+            c.companyName,
+            c.contactEmail,
+            b.startDate,
+            b.endDate,
+            w.name,
+            su.unitNumber,
+            su.capacityKg,
+            b.monthlyRate,
+            w.tenantId
+        )
+        FROM Booking b
+        JOIN Customer c ON b.customerId = c.id
+        JOIN StorageUnit su ON b.storageUnitId = su.id
+        JOIN Warehouse w ON su.warehouseId = w.id
+        WHERE b.endDate <= :endDate
+        AND b.status = 'ACTIVE'
+        """)
+    List<ExpiringBooking> getAllExpiringBookings(@Param("endDate") LocalDate endDate);
 
     /**
      * get booking by tenant id

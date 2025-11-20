@@ -197,8 +197,6 @@ This project is actively being developed. Current phase focuses on API layer com
 - **Event-driven notifications for expiring bookings**
 - **Cache warming on startup**
 - **Async event processing**
-
-### In Progress
 - Integration tests with TestContainers
 
 ### Planned Features

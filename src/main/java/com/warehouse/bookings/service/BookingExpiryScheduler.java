@@ -20,32 +20,25 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BookingExpiryScheduler {
     private final BookingsRepository bookingsRepository;
-    private final TenantRepository tenantRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Scheduled(cron = "0 0 9 * * *") // run daily at 9am
     public void checkExpiringBookings() {
         log.info("Starting daily expiring bookings check...");
 
-        LocalDate sevenDaysFromNow = LocalDate.now().plusDays(7);
+        LocalDate sevenDaysFromNow = LocalDate
+                .now().plusDays(7);
 
-        List<UUID> tenantIds = tenantRepository.findAll()
-                .stream()
-                .map(Tenant::getId)
-                .toList();
+        List<ExpiringBooking> allExpiringBookings = bookingsRepository
+                .getAllExpiringBookings(sevenDaysFromNow);
 
-        int totalEvents = 0;
+        log.info("Found {} expiring bookings across all tenants", allExpiringBookings.size());
 
-        for (UUID tenantId : tenantIds) {
-            List<ExpiringBooking> expiringBookings = bookingsRepository
-                    .getExpiringBookings(tenantId, sevenDaysFromNow);
-
-            for (ExpiringBooking booking : expiringBookings) {
-                publishEvent(booking, tenantId);
-                totalEvents++;
-            }
+        for (ExpiringBooking booking : allExpiringBookings) {
+            publishEvent(booking, booking.tenantId());
         }
-        log.info("Published {} expiring booking events", totalEvents);
+
+        log.info("Published {} expiring booking events", allExpiringBookings.size());
     }
 
     private void publishEvent(ExpiringBooking booking, UUID tenantId) {
