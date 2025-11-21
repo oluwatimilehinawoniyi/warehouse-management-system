@@ -38,6 +38,7 @@ public class Booking {
     private BookingStatus status = BookingStatus.ACTIVE;
 
     @Version
+    @Column(nullable = false)
     private Integer version = 0;
 
     @CreationTimestamp
@@ -50,4 +51,11 @@ public class Booking {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "storage_unit_id", insertable = false, updatable = false)
     private StorageUnit storageUnit;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "notification_status")
+    private NotificationStatus notificationStatus = NotificationStatus.PENDING;
+
+    @Column(name = "retry_count", nullable = false)
+    private Integer retryCount = 0;
 }

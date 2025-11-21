@@ -40,6 +40,13 @@ This system enables warehouse companies to rent storage units to businesses (cus
 - Decoupled event listeners for extensibility
 - Async event processing for non-blocking operations
 
+### Batch Processing & Reliability
+- Scheduled batch processing for expiring booking notifications (20 records per batch)
+- Automatic retry mechanism for failed notifications (hourly retries up to 3 attempts)
+- Status tracking with enum-based markers (PENDING, PROCESSED, FAILED, ABANDONED)
+- Memory-efficient processing preventing server overload on large datasets
+- Graceful failure handling with detailed logging for monitoring
+
 ### API Endpoints
 
 #### Tenants
@@ -86,7 +93,7 @@ This system enables warehouse companies to rent storage units to businesses (cus
 - **Mapping**: MapStruct for DTO-Entity conversion
 - **Caching**: Redis with Spring Cache abstraction
 - **Event Processing**: Spring Events with async support
-- **Scheduling**: Spring Task Scheduler for periodic jobs
+- **Task Scheduling**: Spring Task Scheduler with cron expressions and fixed-rate execution
 
 ## Architecture Decisions
 
